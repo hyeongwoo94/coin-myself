@@ -38,9 +38,9 @@ const List = styled.div`
   }
 `;
 const View = styled.div`
-  border: solid 3px white;
+  border: solid 3px ${(props) => props.theme.textColor};
   border-radius: 15px;
-  background-color: #111;
+  background-color: ${(props) => props.theme.bgColor};
 `;
 const ViewItem = styled.ul`
   margin: 10px auto;
@@ -69,8 +69,8 @@ const Tabs = styled.div`
   gap: 15px;
 `;
 const Tab = styled.span<{ isActive: boolean}>`
-    border: solid 3px #fff;
-    background-color: #111;
+    border: solid 3px ${(props) => props.theme.textColor};
+    background-color: ${(props) => props.theme.bgColor};
     border-radius: 15px;
     width: 100%;
     text-align: center;
@@ -149,7 +149,10 @@ interface PriceInfo {
     };
   };
 }
-const Coin = () => {
+interface ICoinProps{
+  isDark:boolean;
+}
+const Coin = ({isDark}:ICoinProps) => {
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
   const priceMatch = useRouteMatch("/:coinId/price");
@@ -241,7 +244,7 @@ const Coin = () => {
               <Price coinId = {coinId}/>
             </Route>
             <Route path={`/:coinId/chart`}>
-              <Chart coinId={coinId}/>
+              <Chart isDark={isDark} coinId={coinId}/>
             </Route>
           </Switch>
         </>

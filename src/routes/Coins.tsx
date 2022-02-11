@@ -5,6 +5,7 @@ import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { fetchCoins } from "./api";
+import { darkTheme, lightTheme } from "../theme";
 
 const Container = styled.div`
 max-width:480px;
@@ -15,8 +16,24 @@ const Loader = styled.span`
 display: block;
 text-align: center;
 `;
+const BouttonMode = styled.button`
+display: inline-block;
+background-color: ${(props) => props.theme.bgColor};
+color: ${(props) => props.theme.textColor};
+border-radius: 2px;
+text-align: right;
+border:solid 1px ${(props) => props.theme.textColor};
+padding: 3px 5px;
+position: absolute;
+right: 10px;
+top: 10px;
 
+&:hover{
+  background-color: ${(props)=>props.theme.accentColor};
+}
+`;
 const Header = styled.header`
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -71,8 +88,10 @@ interface ICoin {
   is_active: boolean;
   type: string;
 }
-
-const Coins = () => {
+interface ICoinsProps{
+  toggleDark: () => void
+}
+const Coins = ({toggleDark}:ICoinsProps) => {
   const {isLoading, data} = useQuery<ICoin[]>("allCoins", fetchCoins)
   // const [coins, setCoins] = useState<CoinInterface[]>([]);
   // const [loading, setLoading] =useState(true);
@@ -91,8 +110,10 @@ const Coins = () => {
         모든코인
         </title>
       </Helmet>
+     
       <Header>
         <Title>모든 코인</Title>
+        <BouttonMode onClick={toggleDark}>테마 전환</BouttonMode>
       </Header>
       {isLoading ? <Loader>데이터 받아오는 중...</Loader> : <CoinsList>
         {data?.slice(0,100).map((coin) => (

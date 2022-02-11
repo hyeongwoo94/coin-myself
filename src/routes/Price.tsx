@@ -30,7 +30,7 @@ const Cantainer = styled.div``;
 const PriceVeiw = styled.ul`
   border: solid 2px ${(props) => props.theme.textColor};
   border-radius: 10px;
-  background-color: #111;
+  background-color: ${(props) => props.theme.bgColor};
 `;
 const PriceItem = styled.li`
   display: flex;
