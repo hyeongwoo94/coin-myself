@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { fetchCoins } from "./api";
 import { darkTheme, lightTheme } from "../theme";
+import { useSetRecoilState } from "recoil";
+import { isDarkAtom } from "../atoms";
 
 const Container = styled.div`
 max-width:480px;
@@ -25,11 +27,13 @@ text-align: right;
 border:solid 1px ${(props) => props.theme.textColor};
 padding: 3px 5px;
 position: absolute;
-right: 10px;
+right: 5px;
 top: 10px;
+
 
 &:hover{
   background-color: ${(props)=>props.theme.accentColor};
+  color: black;
 }
 `;
 const Header = styled.header`
@@ -89,20 +93,12 @@ interface ICoin {
   type: string;
 }
 interface ICoinsProps{
-  toggleDark: () => void
+  
 }
-const Coins = ({toggleDark}:ICoinsProps) => {
+const Coins = ({}:ICoinsProps) => {
+  const setDarkAtom = useSetRecoilState(isDarkAtom)
+  const toggleDarkAtom = () => setDarkAtom(prev => !prev);
   const {isLoading, data} = useQuery<ICoin[]>("allCoins", fetchCoins)
-  // const [coins, setCoins] = useState<CoinInterface[]>([]);
-  // const [loading, setLoading] =useState(true);
-  // useEffect(()=>{
-  //   (async()=> {
-  //     const response = await fetch("https://api.coinpaprika.com/v1/coins")
-  //     const json = await response.json();
-  //     setCoins(json.slice(0,100));
-  //     setLoading(false);
-  //   })();
-  // },[])
   return (
     <Container>
       <Helmet>
@@ -110,10 +106,10 @@ const Coins = ({toggleDark}:ICoinsProps) => {
         모든코인
         </title>
       </Helmet>
-     
+    
       <Header>
         <Title>모든 코인</Title>
-        <BouttonMode onClick={toggleDark}>테마 전환</BouttonMode>
+        <BouttonMode onClick={toggleDarkAtom}>모드변경</BouttonMode>
       </Header>
       {isLoading ? <Loader>데이터 받아오는 중...</Loader> : <CoinsList>
         {data?.slice(0,100).map((coin) => (
