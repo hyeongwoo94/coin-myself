@@ -2,8 +2,17 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { Helmet } from "react-helmet";
 import { useQuery } from "react-query";
-import { Switch, Route, useLocation, useParams, Link, useRouteMatch } from "react-router-dom";
+import {
+  Switch,
+  Route,
+  useLocation,
+  useParams,
+  Link,
+  useRouteMatch,
+} from "react-router-dom";
+import { useSetRecoilState } from "recoil";
 import styled from "styled-components";
+import { isDarkAtom } from "../atoms";
 import { fetchCoinInfo, fetchCoinTickers } from "./api";
 import Chart from "./Chart";
 import Price from "./Price";
@@ -19,6 +28,7 @@ const Loader = styled.span`
 `;
 
 const Header = styled.header`
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -30,11 +40,11 @@ const Title = styled.h1`
 const List = styled.div`
   text-align: right;
   margin: 10px auto;
-  a{
+  a {
     color: ${(props) => props.theme.textColor};
-    &:hover{
-        color: ${(props) => props.theme.accentColor};
-      }
+    &:hover {
+      color: ${(props) => props.theme.accentColor};
+    }
   }
 `;
 const View = styled.div`
@@ -68,26 +78,44 @@ const Tabs = styled.div`
   justify-content: space-around;
   gap: 15px;
 `;
-const Tab = styled.span<{ isActive: boolean}>`
-    border: solid 3px ${(props) => props.theme.textColor};
-    background-color: ${(props) => props.theme.bgColor};
-    border-radius: 15px;
-    width: 100%;
-    text-align: center;
-    display: inline-block;
-    color: ${(props) => props.theme.textColor};
-    font-size: 1.25rem;
-    line-height: 30px;
-    margin-bottom: 20px;
-    a{
-      display: block;
-      color: ${(props) =>
-    props.isActive ? props.theme.accentColor : props.theme.textColor};
-      &:hover{
-        color: ${(props) => props.theme.accentColor};
-      }
+const Tab = styled.span<{ isActive: boolean }>`
+  border: solid 3px ${(props) => props.theme.textColor};
+  background-color: ${(props) => props.theme.bgColor};
+  border-radius: 15px;
+  width: 100%;
+  text-align: center;
+  display: inline-block;
+  color: ${(props) => props.theme.textColor};
+  font-size: 1.25rem;
+  line-height: 30px;
+  margin-bottom: 20px;
+  a {
+    display: block;
+    color: ${(props) =>
+      props.isActive ? props.theme.accentColor : props.theme.textColor};
+    &:hover {
+      color: ${(props) => props.theme.accentColor};
     }
+  }
 `;
+const BouttonMode = styled.button`
+  display: inline-block;
+  background-color: ${(props) => props.theme.bgColor};
+  color: ${(props) => props.theme.textColor};
+  border-radius: 2px;
+  text-align: right;
+  border: solid 1px ${(props) => props.theme.textColor};
+  padding: 3px 5px;
+  position: absolute;
+  right: 5px;
+  top: 10px;
+
+  &:hover {
+    background-color: ${(props) => props.theme.accentColor};
+    color: black;
+  }
+`;
+
 interface RouteParams {
   coinId: string;
 }
@@ -149,25 +177,29 @@ interface PriceInfo {
     };
   };
 }
-interface ICoinProps{
- 
-}
-const Coin = ({}:ICoinProps) => {
+interface ICoinProps {}
+const Coin = ({}: ICoinProps) => {
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
+  const setDarkAtom = useSetRecoilState(isDarkAtom);
+  const toggleDarkAtom = () => setDarkAtom((prev) => !prev);
   const priceMatch = useRouteMatch("/:coinId/price");
   const chartMatch = useRouteMatch("/:coinId/chart");
-  const {isLoading: infoLoading, data: infoData} = useQuery<InfoData>(["info", coinId],
-  () => fetchCoinInfo(coinId));
-  const {isLoading: tickersLoading, data:tickersData} = useQuery<PriceInfo>(["tickers", coinId],
-  () => fetchCoinTickers(coinId));
+  const { isLoading: infoLoading, data: infoData } = useQuery<InfoData>(
+    ["info", coinId],
+    () => fetchCoinInfo(coinId)
+  );
+  const { isLoading: tickersLoading, data: tickersData } = useQuery<PriceInfo>(
+    ["tickers", coinId],
+    () => fetchCoinTickers(coinId)
+  );
 
-  const loading = infoLoading || tickersLoading ;
+  const loading = infoLoading || tickersLoading;
   return (
     <Container>
       <Helmet>
         <title>
-        {state?.name
+          {state?.name
             ? state.name
             : loading
             ? "데이터 받아오는 중..."
@@ -182,10 +214,11 @@ const Coin = ({}:ICoinProps) => {
             ? "데이터 받아오는 중..."
             : infoData?.name}
         </Title>
+        <BouttonMode onClick={toggleDarkAtom}>모드변경</BouttonMode>
       </Header>
-        <List>
-        <Link to ="/">뒤로가기</Link>
-        </List>
+      <List>
+        <Link to="/">뒤로가기</Link>
+      </List>
       {loading ? (
         <Loader>데이터 받아오는 중...</Loader>
       ) : (
@@ -216,18 +249,18 @@ const Coin = ({}:ICoinProps) => {
           </View>
           <Tabs>
             <Tab isActive={chartMatch !== null}>
-            <Link to={`/${coinId}/chart`}>차트</Link>
+              <Link to={`/${coinId}/chart`}>차트</Link>
             </Tab>
             <Tab isActive={priceMatch !== null}>
-            <Link to={`/${coinId}/price`}>가격</Link>
+              <Link to={`/${coinId}/price`}>가격</Link>
             </Tab>
           </Tabs>
           <Switch>
             <Route path={`/${coinId}/price`}>
-              <Price coinId = {coinId}/>
+              <Price coinId={coinId} />
             </Route>
             <Route path={`/:coinId/chart`}>
-              <Chart coinId={coinId}/>
+              <Chart coinId={coinId} />
             </Route>
           </Switch>
         </>
